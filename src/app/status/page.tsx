@@ -12,7 +12,7 @@ export default function StatusPage() {
   const checkConnection = useCallback(async () => {
     setBackendStatus("pending");
     try {
-      const response = await fetch(`http://localhost:${backendPort}/api/v1/hello`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/hello`);
       if (response.ok) {
         const data = await response.json();
         setBackendStatus("success");
@@ -56,7 +56,7 @@ export default function StatusPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold">Backend Service</h3>
-                  <p className="text-xs text-slate-500">http://localhost:{backendPort}</p>
+                  <p className="text-xs text-slate-500">{process.env.NEXT_PUBLIC_BACKEND_URL}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">

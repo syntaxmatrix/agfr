@@ -94,7 +94,7 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
       setConvId(conversationId);
       const fetchHistory = async () => {
         try {
-          const res = await axios.get<HistoryResponse>(`http://localhost:8000/api/v1/history/${conversationId}`, {
+          const res = await axios.get<HistoryResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/history/${conversationId}`, {
             withCredentials: true
           });
           if (res.data?.ok && res.data.messages) {
@@ -147,7 +147,7 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
     setLoading(true);
 
     try {
-      const res = await axios.get<AgentChatResponse>("http://localhost:8000/api/v1/agent/chats", { 
+      const res = await axios.get<AgentChatResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/agent/chats`, { 
         params: { q, conversationId: convId },
         withCredentials: true 
       });

@@ -1,7 +1,7 @@
-export const BACKEND_GOOGLE_URL = "http://localhost:8000/api/v1/user/google";
+export const BACKEND_GOOGLE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/google`;
 
-export const BACKEND_GOOGLE_GMAIL_URL = "http://localhost:8000/api/v1/user/gmail";
+export const BACKEND_GOOGLE_GMAIL_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/gmail`;
 
-export const ProductName = "Agentic AI";
+export const ProductName = "Syntx AI";
 
 export const Version = "0.2.0";

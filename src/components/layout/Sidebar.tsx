@@ -89,7 +89,7 @@ useEffect(() => {
     if (isAuthenticated) {
       const fetchHistory = async () => {
         try {
-          const res = await axios.get<HistoryResponse>("http://localhost:8000/api/history", {
+          const res = await axios.get<HistoryResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/history`, {
             withCredentials: true
           });
           if (res.data?.ok) {
