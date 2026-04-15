@@ -1,0 +1,206 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Outfit', system-ui, sans-serif;
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 1rem;
+  /* Human-crafted neutralized palette */
+  --background: #fdfdfd;
+  --foreground: #1e293b;
+  --sidebar: #f8fafc;
+  --sidebar-foreground: #475569;
+  --sidebar-primary: #0f172a;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-border: #e2e8f0;
+  
+  --primary: #0f172a;
+  --primary-foreground: #ffffff;
+  
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  
+  --border: #f1f5f9;
+  --input: #ffffff;
+  --ring: rgba(15, 23, 42, 0.05);
+
+  --glass: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.5);
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --sidebar: #1e293b;
+  --sidebar-foreground: #94a3b8;
+  --sidebar-primary: #f8fafc;
+  --sidebar-accent: #334155;
+  --sidebar-border: #334155;
+  
+  --primary: #f8fafc;
+  --primary-foreground: #0f172a;
+  
+  --muted: #334155;
+  --muted-foreground: #94a3b8;
+  
+  --accent: #334155;
+  --accent-foreground: #f8fafc;
+  
+  --border: #1e293b;
+  --input: #0f172a;
+  --ring: rgba(248, 250, 252, 0.1);
+
+  --glass: rgba(15, 23, 42, 0.7);
+  --glass-border: rgba(15, 23, 42, 0.5);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background: 
+      radial-gradient(circle at 0% 0%, rgba(200, 210, 255, 0.3), transparent 35%),
+      radial-gradient(circle at 100% 100%, rgba(220, 210, 255, 0.3), transparent 35%),
+      var(--background);
+    min-height: 100vh;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+  }
+  
+  /* Slight imperfections for human-crafted feel */
+  .human-shadow {
+    box-shadow: 0 4px 30px -4px rgba(0, 0, 0, 0.04), 
+                0 2px 12px -2px rgba(0, 0, 0, 0.02);
+  }
+  
+  .human-border {
+    /* Subtle organic radius variation */
+    border-radius: 17px 15px 16px 18px / 15px 17px 18px 16px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/15 rounded-full;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/30;
+  }
+
+  /* Micro-interactions */
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* ChatGPT style sidebar transition */
+.sidebar-transition {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Auth Pages Layout custom classes */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 32px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  color: #6b7280;
+}
+
+.input {
+  width: 100%;
+  padding-left: 40px;
+}
+
+.input:focus,
+.input:focus-visible {
+  border-color: #000000 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.btn-primary {
+  width: 100%;
+  border-radius: 10px;
+}
