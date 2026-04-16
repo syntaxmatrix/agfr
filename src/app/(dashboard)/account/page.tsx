@@ -27,6 +27,10 @@ export default function AccountPage() {
   const [usernameMessage, setUsernameMessage] = useState("");
   const router = useRouter();
   const { user, refresh } = useAuth();
+  const hasProfilePicture =
+    typeof user?.profileURL === "string" &&
+    user.profileURL.trim() !== "" &&
+    user.profileURL.trim().toLowerCase() !== "null";
 
   const requestSecurityCode = async () => {
     setLoading(true);
@@ -132,7 +136,17 @@ export default function AccountPage() {
         <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
           <div className="relative group">
             <div className="w-32 h-32 rounded-full bg-indigo-50 border-4 border-white shadow-xl flex items-center justify-center text-indigo-600 transition-transform group-hover:scale-105 duration-300">
-              <User size={56} className="opacity-80" />
+              {hasProfilePicture ? (
+                <Image
+                  src={user.profileURL as string}
+                  alt={user.name || "Profile picture"}
+                  width={128}
+                  height={128}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <User size={56} className="opacity-80" />
+              )}
             </div>
             <div className="absolute bottom-1 right-1 bg-emerald-500 w-6 h-6 rounded-full border-4 border-white shadow-sm ring-4 ring-emerald-500/10"></div>
           </div>

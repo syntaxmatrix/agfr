@@ -6,6 +6,7 @@ import axios from "@/lib/axios";
 type AuthUser = {
   _id?: string;
   name?: string;
+  profileURL?: string;
   email?: string;
   username?: string;
   googleConnected?: boolean;

@@ -39,6 +39,10 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
   const auth = useContext(AuthContext);
   const isAuthenticated = auth?.isAuthenticated ?? false;
   const user = auth?.user ?? null;
+  const hasProfileUrl =
+    typeof user?.profileURL === "string" &&
+    user.profileURL.trim() !== "" &&
+    user.profileURL.trim().toLowerCase() !== "null";
   const refresh = auth?.refresh ?? (async () => {});
   const router = useRouter();
 const [currentConversationId, setCurrentConversationId] = React.useState<string | null>(null);
@@ -206,7 +210,7 @@ useEffect(() => {
                     </button>
 
                     {openMenuId === chat._id && (
-                      <div className="absolute right-0 top-10 min-w-28 bg-white border border-slate-200 shadow-md rounded-lg py-1 z-[60] text-slate-700">
+                      <div className="absolute right-0 top-10 min-w-28 bg-white border border-slate-200 shadow-md rounded-lg py-1 z-60 text-slate-700">
                         <button
                           onClick={(e) => handleDelete(chat._id, e)}
                           className="w-full text-left px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
@@ -231,7 +235,15 @@ useEffect(() => {
             !isOpen && "md:justify-center md:border-none md:bg-transparent"
           )}>
             <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden shrink-0 border-2 border-white shadow-sm">
-              <User size={20} />
+              {hasProfileUrl ? (
+                <img
+                  src={user.profileURL as string}
+                  alt={user.name || "Profile picture"}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <User size={20} />
+              )}
             </div>
             {isOpen && (
               <Link href="/account" className="flex-1 min-w-0">
