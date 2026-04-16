@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { ProductName } from "@/constant";
+import { v4 as uuidv4 } from "uuid";
 
 type Role = "user" | "agent";
 
@@ -64,7 +65,7 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
   const [messages, setMessages] = useState<ChatMessage[]>(
     initialQuery ? [{ from: "user", text: initialQuery }] : []
   );
-  const [convId, setConvId] = useState(conversationId || crypto.randomUUID());
+  const [convId, setConvId] = useState(conversationId || uuidv4());
   const [input, setInput] = useState(initialQuery ?? "");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -110,7 +111,7 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
       fetchHistory();
     } else {
       // New conversation
-      setConvId(crypto.randomUUID());
+      setConvId(uuidv4());
       setMessages(initialQuery ? [{ from: "user", text: initialQuery }] : []);
       setInput(initialQuery ?? "");
     }
@@ -118,7 +119,7 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
 
   useEffect(() => {
     const handleForceReset = () => {
-      setConvId(crypto.randomUUID());
+      setConvId(uuidv4());
       setMessages([]);
       setInput("");
     };
@@ -226,16 +227,16 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
       {/* Messages Area */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-6 py-8 space-y-8 scroll-smooth custom-scrollbar"
+        className="flex-1 overflow-y-auto px-3 py-5 sm:px-4 sm:py-6 md:px-6 md:py-8 space-y-5 md:space-y-8 scroll-smooth custom-scrollbar"
       >
         {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center text-center space-y-6 opacity-40 select-none">
-            <div className="w-20 h-20 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
-              <Sparkles size={40} />
+          <div className="h-full flex flex-col items-center justify-center text-center space-y-5 px-4 opacity-40 select-none">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+              <Sparkles size={32} className="md:w-10 md:h-10" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Intelligence Ready</h3>
-              <p className="text-slate-500 font-medium max-w-[200px] mx-auto leading-relaxed">
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Intelligence Ready</h3>
+              <p className="text-sm md:text-base text-slate-500 font-medium max-w-[220px] mx-auto leading-relaxed">
                 Start a conversation to see {ProductName} in action.
               </p>
             </div>
@@ -246,19 +247,19 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
           <div 
             key={i} 
             className={cn(
-              "flex items-start gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300",
+              "flex items-start gap-2.5 sm:gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300",
               m.from === "user" ? "flex-row-reverse" : "flex-row"
             )}
           >
             <div className={cn(
-              "w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border",
+              "w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border",
               m.from === "user" ? "bg-white border-slate-100 text-slate-600" : "bg-slate-900 border-slate-900 text-white"
             )}>
-              {m.from === "user" ? <User size={18} /> : <Bot size={18} />}
+              {m.from === "user" ? <User className="w-4 h-4 md:w-[18px] md:h-[18px]" /> : <Bot className="w-4 h-4 md:w-[18px] md:h-[18px]" />}
             </div>
             
             <div className={cn(
-              "max-w-[80%] px-6 py-4 rounded-[2rem] text-sm font-medium leading-relaxed shadow-sm",
+              "max-w-[88%] sm:max-w-[84%] md:max-w-[80%] px-4 py-3 sm:px-5 md:px-6 md:py-4 rounded-[1.5rem] md:rounded-[2rem] text-sm font-medium leading-relaxed shadow-sm break-words",
               m.from === "user" 
                 ? "bg-slate-50 text-slate-800 rounded-tr-none border border-slate-100" 
                 : "bg-white text-slate-800 rounded-tl-none border border-slate-100"
@@ -268,11 +269,11 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
           </div>
         ))}
         {loading && (
-          <div className="flex items-start gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300 flex-row">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border bg-slate-900 border-slate-900 text-white">
-              <Bot size={18} />
+          <div className="flex items-start gap-2.5 sm:gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300 flex-row">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border bg-slate-900 border-slate-900 text-white">
+              <Bot className="w-4 h-4 md:w-[18px] md:h-[18px]" />
             </div>
-            <div className="max-w-[80%] px-6 py-4 rounded-[2rem] text-sm font-medium leading-relaxed shadow-sm bg-white text-slate-800 rounded-tl-none border border-slate-100 flex items-center gap-3">
+            <div className="max-w-[88%] sm:max-w-[84%] md:max-w-[80%] px-4 py-3 sm:px-5 md:px-6 md:py-4 rounded-[1.5rem] md:rounded-[2rem] text-sm font-medium leading-relaxed shadow-sm bg-white text-slate-800 rounded-tl-none border border-slate-100 flex items-center gap-3">
               <Loader2 size={16} className="animate-spin text-slate-400" />
               <span className="text-slate-500 animate-pulse">{LOADING_MESSAGES[messageIndex]}</span>
             </div>
@@ -281,30 +282,30 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
       </div>
 
       {/* Input Area */}
-      <div className="p-6 bg-white border-t border-slate-50">
+      <div className="p-3 sm:p-4 md:p-6 bg-white border-t border-slate-50">
         <form 
           onSubmit={send} 
-          className="relative glass rounded-[2.5rem] border border-slate-200 bg-slate-50/50 p-2 shadow-2xl focus-within:ring-8 focus-within:ring-slate-900/5 transition-all"
+          className="relative glass rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 bg-slate-50/50 p-1.5 sm:p-2 shadow-2xl focus-within:ring-4 md:focus-within:ring-8 focus-within:ring-slate-900/5 transition-all"
         >
-          <div className="flex items-center">
-            <button type="button" className="p-4 text-slate-400 hover:text-slate-900 transition-colors">
+          <div className="flex items-center gap-1">
+            <button type="button" className="p-3 sm:p-4 text-slate-400 hover:text-slate-900 transition-colors shrink-0">
               <Paperclip size={20} />
             </button>
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={loading}
-              className="flex-1 bg-transparent px-2 py-4 text-sm font-semibold focus:outline-none placeholder:text-slate-300 text-slate-800 disabled:opacity-50"
+              className="flex-1 min-w-0 bg-transparent px-1 sm:px-2 py-3 sm:py-4 text-sm font-semibold focus:outline-none placeholder:text-slate-300 text-slate-800 disabled:opacity-50"
               placeholder={`Message ${ProductName}...`}
             />
-            <div className="flex items-center gap-1.5 pr-2">
+            <div className="flex items-center gap-1 pr-1 sm:pr-2 shrink-0">
               <button type="button" className="p-3 text-slate-300 hover:text-slate-600 transition-colors hidden sm:block">
                 <Mic size={20} />
               </button>
               <button 
                 type="submit" 
                 className={cn(
-                  "p-4 bg-slate-900 text-white rounded-3xl shadow-xl transition-all active:scale-95 flex items-center gap-2",
+                  "p-3 sm:p-4 bg-slate-900 text-white rounded-3xl shadow-xl transition-all active:scale-95 flex items-center gap-2",
                   !input.trim() && !loading ? "opacity-30 pointer-events-none grayscale" : "opacity-100 hover:bg-slate-800"
                 )}
                 disabled={loading || !input.trim()}

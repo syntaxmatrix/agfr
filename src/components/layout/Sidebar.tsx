@@ -131,12 +131,12 @@ useEffect(() => {
     <aside 
       className={cn(
         "fixed left-0 top-0 h-screen bg-white border-r border-slate-200 z-50 flex flex-col transition-all duration-300 ease-in-out",
-        isOpen ? "w-64" : "w-20"
+        isOpen ? "w-[min(18rem,88vw)] md:w-64 translate-x-0" : "-translate-x-full md:w-20 md:translate-x-0"
       )}
     >
       {/* Sidebar Header: Logo & Toggle */}
-      <div className="h-20 flex items-center justify-between px-5 shrink-0">
-        <Link href="/" className={cn("flex items-center gap-3 transition-opacity duration-300", !isOpen && "opacity-0 pointer-events-none")}>
+      <div className="h-20 flex items-center justify-between px-4 md:px-5 shrink-0">
+        <Link href="/" className={cn("flex items-center gap-3 transition-opacity duration-300", !isOpen && "md:opacity-0 md:pointer-events-none")}>
           <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-lg active:scale-95 transition-transform">
             <Sparkles size={20} />
           </div>
@@ -146,7 +146,7 @@ useEffect(() => {
           onClick={toggle}
           className={cn(
             "p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-900",
-            !isOpen && "mx-auto"
+            !isOpen && "md:mx-auto"
           )}
         >
           <PanelLeft size={20} />
@@ -154,10 +154,10 @@ useEffect(() => {
       </div>
 
       {/* Action: New Chat */}
-      <div className="px-4 mb-6 shrink-0">
+      <div className="px-4 mb-5 md:mb-6 shrink-0">
         <Link href="/chats" className={cn(
           "w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-all shadow-md active:scale-95",
-          !isOpen && "justify-center px-0 shrink-0"
+          !isOpen && "md:justify-center md:px-0 shrink-0"
         )}>
           <Plus size={20} />
           {isOpen && <span>New Chat</span>}
@@ -228,7 +228,7 @@ useEffect(() => {
         {isAuthenticated && user ? (
           <div className={cn(
             "flex items-center gap-3 p-2 rounded-2xl bg-slate-50 border border-slate-200/50 group",
-            !isOpen && "justify-center border-none bg-transparent"
+            !isOpen && "md:justify-center md:border-none md:bg-transparent"
           )}>
             <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden shrink-0 border-2 border-white shadow-sm">
               <User size={20} />

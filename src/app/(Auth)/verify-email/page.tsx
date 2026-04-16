@@ -28,7 +28,7 @@ export default function VerifyEmailPage() {
 
     setIsLoading(true)
     try {
-      const response = await axios.post("/api/v1/user/verifyemail", {
+      const response = await axios.post("/api/user/verifyemail", {
         securityCode: otp,
       })
 

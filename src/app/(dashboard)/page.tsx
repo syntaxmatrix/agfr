@@ -41,10 +41,10 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="flex flex-col gap-12 pt-4 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex flex-col gap-8 md:gap-12 pt-2 md:pt-4 pb-16 md:pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Hero Section */}
-      <section className="relative w-full rounded-[2.5rem] bg-gradient-to-br from-slate-50 to-white border border-white/50 human-shadow overflow-hidden group hero-section">
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+      <section className="relative w-full rounded-[2rem] md:rounded-[2.5rem] bg-gradient-to-br from-slate-50 to-white border border-white/50 human-shadow overflow-hidden group hero-section px-5 py-8 sm:px-6 md:px-10 md:py-12 lg:px-14 lg:py-14">
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-10">
           <div className="flex-1 space-y-8 text-center md:text-left hero-content">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200/50 text-[11px] font-bold text-slate-500 uppercase tracking-widest shadow-sm">
               <Sparkles size={12} className="text-slate-400" />
@@ -64,8 +64,8 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <div className="relative flex-1 flex justify-center lg:justify-end">
-            <div className="relative w-[320px] h-[320px] lg:w-[420px] lg:h-[420px] drop-shadow-2xl animate-float">
+          <div className="relative flex-1 flex justify-center lg:justify-end w-full">
+            <div className="relative w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] lg:w-[420px] lg:h-[420px] drop-shadow-2xl animate-float">
               <Image
                 src="/robot.png"
                 alt="Friendly AI Robot"
@@ -75,8 +75,8 @@ export default function DashboardPage() {
               />
 
               {/* Floating Chat Bubble */}
-              <div className="absolute -top-4 -right-2 md:top-10 md:right-0 bg-white p-4 rounded-2xl rounded-tr-none human-shadow border border-slate-100/50 animate-bounce-slow">
-                <p className="text-sm font-semibold text-slate-800">How can I help you?</p>
+              <div className="absolute top-2 -right-2 sm:-top-4 sm:-right-2 md:top-10 md:right-0 bg-white px-3 py-2.5 sm:p-4 rounded-2xl rounded-tr-none human-shadow border border-slate-100/50 animate-bounce-slow max-w-[180px] sm:max-w-none">
+                <p className="text-xs sm:text-sm font-semibold text-slate-800">How can I help you?</p>
                 <div className="absolute top-0 right-0 w-3 h-3 bg-white border-t border-r border-slate-100/50 rotate-45 translate-x-1/2 -translate-y-1/2"></div>
               </div>
             </div>
@@ -89,11 +89,11 @@ export default function DashboardPage() {
       </section>
 
       {/* Feature Cards Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8">
         {features.map((feature, idx) => (
           <div
             key={idx}
-            className="group relative p-8 rounded-[2rem] bg-white border border-slate-100 hover:border-slate-200 transition-all duration-300 human-shadow cursor-pointer hover-lift overflow-hidden"
+            className="group relative p-6 sm:p-7 md:p-8 rounded-[1.75rem] md:rounded-[2rem] bg-white border border-slate-100 hover:border-slate-200 transition-all duration-300 human-shadow cursor-pointer hover-lift overflow-hidden"
           >
             <div className="relative z-10 space-y-5">
               <div className={cn(
@@ -103,7 +103,7 @@ export default function DashboardPage() {
                 <feature.icon size={26} />
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-display font-semibold text-slate-800">{feature.title}</h3>
+                <h3 className="text-xl sm:text-2xl font-display font-semibold text-slate-800">{feature.title}</h3>
                 <span className="inline-block text-[10px] font-bold text-slate-400 border border-slate-100 px-2.5 py-0.5 rounded-full uppercase tracking-widest leading-none">
                   {feature.subtitle}
                 </span>

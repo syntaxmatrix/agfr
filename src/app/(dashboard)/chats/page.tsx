@@ -13,7 +13,7 @@ function ChatsContent() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <RequireAuth>
-        <div className="h-[calc(100vh-180px)] flex flex-col bg-white rounded-[2.5rem] border border-slate-100 human-shadow overflow-hidden">
+        <div className="h-[calc(100vh-8.5rem)] md:h-[calc(100vh-180px)] min-h-[26rem] flex flex-col bg-white rounded-[1.75rem] md:rounded-[2.5rem] border border-slate-100 human-shadow overflow-hidden">
           <ChatWindow initialQuery={q || undefined} conversationId={conversationId} />
         </div>
       </RequireAuth>

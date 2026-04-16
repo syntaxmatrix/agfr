@@ -17,6 +17,15 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen flex bg-background text-foreground overflow-hidden">
+      {isSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          onClick={toggleSidebar}
+          className="fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-[1px] md:hidden"
+        />
+      )}
+
       <Sidebar 
         isOpen={isSidebarOpen} 
         toggle={toggleSidebar} 
@@ -25,13 +34,13 @@ export default function DashboardLayout({
       <div 
         className={cn(
           "flex-1 flex flex-col h-screen sidebar-transition",
-          isSidebarOpen ? "pl-64" : "pl-16"
+          isSidebarOpen ? "md:pl-64" : "md:pl-20"
         )}
       >
         <Header />
         
         <main className="flex-1 overflow-y-auto custom-scrollbar">
-          <div className="max-w-[1400px] mx-auto p-4 md:p-8 lg:p-10 pb-32">
+          <div className="max-w-[1400px] mx-auto px-4 py-4 sm:px-5 md:p-8 lg:p-10 pb-24 md:pb-32">
             <RequireAuth>
               {children}
             </RequireAuth>
