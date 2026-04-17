@@ -1,30 +1,37 @@
 "use client"
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { 
-  User, 
-  Mail, 
+import {
+  User,
+  Mail,
   ShieldCheck,
   CheckCircle2,
-  LogOut, 
-  Globe, 
+  LogOut,
+  Globe,
   ArrowRight,
   ShieldAlert,
+  LoaderCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { ProductName } from "@/constant"
-
+import { ProductName } from "@/constant";
 
 export default function AccountPage() {
-  const [loading, setLoading] = useState(false);
+  const [securityLoading, setSecurityLoading] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+  const [connectLoading, setConnectLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [nameInput, setNameInput] = useState("");
   const [usernameInput, setUsernameInput] = useState("");
   const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken" | "error">("idle");
   const [usernameMessage, setUsernameMessage] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [formError, setFormError] = useState("");
   const router = useRouter();
   const { user, refresh } = useAuth();
   const hasProfilePicture =
@@ -32,77 +39,174 @@ export default function AccountPage() {
     user.profileURL.trim() !== "" &&
     user.profileURL.trim().toLowerCase() !== "null";
 
-  const requestSecurityCode = async () => {
-    setLoading(true);
-    try {
-      await axios.post("/api/user/requestsecuritycode");
-      toast.success("Security Code Sent", {
-        description: "Check your email for the 6-digit security code."
-      });
-    } catch (err: unknown) {
-      const msg = 
-        typeof err === "object" &&
-        err !== null &&
-        "response" in err &&
-        typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message === "string"
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
-          : err instanceof Error
-            ? err.message
-            : "Failed to send code";
-      toast.error("Operation Failed", { description: msg });
-    } finally {
-      setLoading(false);
+  const getErrorMessage = (err: unknown, fallback: string) => {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "response" in err &&
+      typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message === "string"
+    ) {
+      return (err as { response?: { data?: { message?: string } } }).response?.data?.message ?? fallback;
     }
+
+    if (err instanceof Error) {
+      return err.message;
+    }
+
+    return fallback;
   };
 
-  const checkUsername = async (val: string) => {
-    setUsernameInput(val);
-    if (!val.trim()) {
+  useEffect(() => {
+    if (!user) return;
+    setNameInput(user.name || "");
+    setUsernameInput(user.username || "");
+  }, [user]);
+
+  const checkUsernameAvailability = async (value: string) => {
+    const trimmedUsername = value.trim();
+
+    if (!trimmedUsername) {
       setUsernameStatus("idle");
       setUsernameMessage("");
-      return;
+      setUsernameError("");
+      return true;
     }
+
     setUsernameStatus("checking");
+    setUsernameMessage("");
+
     try {
-      const res = await axios.get("/api/user/usernameavailability", { params: { username: val } });
+      const res = await axios.get("/api/user/usernameavailability", {
+        params: { username: trimmedUsername },
+      });
       const msg = res.data?.message || "";
-      if (msg.includes("Already Registered")) {
-        setUsernameStatus("taken");
-      } else {
-        setUsernameStatus("available");
-      }
+      const isTaken = msg.includes("Already Registered");
+
+      setUsernameStatus(isTaken ? "taken" : "available");
       setUsernameMessage(msg);
+      setUsernameError(isTaken ? msg || "Username is already taken" : "");
+      return !isTaken;
     } catch {
       setUsernameStatus("error");
       setUsernameMessage("Failed to check availability");
+      setUsernameError("Failed to check username availability");
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    if (!user) return;
+
+    const trimmedUsername = usernameInput.trim();
+    const currentUsername = (user.username || "").trim();
+
+    if (!trimmedUsername) {
+      setUsernameStatus("idle");
+      setUsernameMessage("");
+      setUsernameError("");
+      return undefined;
+    }
+
+    if (trimmedUsername === currentUsername) {
+      setUsernameStatus("idle");
+      setUsernameMessage("");
+      setUsernameError("");
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      await checkUsernameAvailability(trimmedUsername);
+    }, 500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [usernameInput, user]);
+
+  const requestSecurityCode = async () => {
+    setSecurityLoading(true);
+    try {
+      await axios.post("/api/user/requestsecuritycode");
+      toast.success("Security Code Sent", {
+        description: "Check your email for the 6-digit security code.",
+      });
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err, "Failed to send code");
+      toast.error("Operation Failed", { description: msg });
+    } finally {
+      setSecurityLoading(false);
+    }
+  };
+
+  const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!user) return;
+
+    const trimmedName = nameInput.trim();
+    const trimmedUsername = usernameInput.trim();
+    const currentName = (user.name || "").trim();
+    const currentUsername = (user.username || "").trim();
+
+    setNameError("");
+    setUsernameError("");
+    setFormError("");
+
+    if (usernameInput.length > 0 && !trimmedUsername) {
+      setUsernameError("Username cannot be empty if provided");
+      return;
+    }
+
+    if (trimmedUsername && trimmedUsername !== currentUsername) {
+      const isUsernameAvailable = await checkUsernameAvailability(trimmedUsername);
+      if (!isUsernameAvailable) {
+        return;
+      }
+    }
+
+    const payload: { name?: string; username?: string } = {};
+
+    if (trimmedName && trimmedName !== currentName) {
+      payload.name = trimmedName;
+    }
+
+    if (trimmedUsername && trimmedUsername !== currentUsername) {
+      payload.username = trimmedUsername;
+    }
+
+    if (!payload.name && !payload.username) {
+      setFormError("Please change at least one field before submitting");
+      return;
+    }
+
+    setProfileLoading(true);
+    try {
+      await axios.put("/api/user/updatedprofile", payload);
+      toast.success("Profile Updated Successfully");
+      await refresh();
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err, "Failed to update profile");
+      setFormError(msg);
+      toast.error("Profile Update Failed", { description: msg });
+    } finally {
+      setProfileLoading(false);
     }
   };
 
   const logout = async () => {
-    setLoading(true);
+    setLogoutLoading(true);
     try {
       await axios.post("/api/user/logout");
       toast.success("Successfully Logged Out");
       await refresh();
       router.push("/login");
     } catch (err: unknown) {
-      const msg = 
-        typeof err === "object" &&
-        err !== null &&
-        "response" in err &&
-        typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message === "string"
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
-          : err instanceof Error
-            ? err.message
-            : "Logout Failed";
+      const msg = getErrorMessage(err, "Logout Failed");
       toast.error("Logout Failed", { description: msg });
     } finally {
-      setLoading(false);
+      setLogoutLoading(false);
     }
   };
 
   const connectGmail = async () => {
-    setLoading(true);
+    setConnectLoading(true);
     try {
       const res = await axios.get("/api/user/email");
       const encryptedEmail = res.data?.data?.email || res.data?.email;
@@ -120,10 +224,10 @@ export default function AccountPage() {
         return;
       }
       toast.error("Linking failed", {
-        description: "Please ensure your session is active."
+        description: "Please ensure your session is active.",
       });
     } finally {
-      setLoading(false);
+      setConnectLoading(false);
     }
   };
 
@@ -131,7 +235,6 @@ export default function AccountPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header Profile Section */}
       <section className="bg-white rounded-[2.5rem] border border-slate-100 human-shadow p-8 md:p-12">
         <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
           <div className="relative group">
@@ -178,7 +281,6 @@ export default function AccountPage() {
       </section>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Security & Actions */}
         <section className="bg-white rounded-[2.5rem] border border-slate-100 human-shadow p-8 space-y-6">
           <div className="space-y-2">
             <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
@@ -189,12 +291,11 @@ export default function AccountPage() {
           </div>
 
           <div className="space-y-4 pt-2">
-
             <div
               className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between group hover:bg-white hover:shadow-lg hover:border-slate-200 transition-all cursor-pointer"
               onClick={() => {
                 void requestSecurityCode();
-                router.push('/reset');
+                router.push("/reset");
               }}
             >
               <div className="space-y-1">
@@ -206,7 +307,6 @@ export default function AccountPage() {
           </div>
         </section>
 
-        {/* Integration & Linking */}
         <section className="bg-white rounded-[2.5rem] border border-slate-100 human-shadow p-8 space-y-6">
           <div className="space-y-2">
             <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
@@ -232,53 +332,110 @@ export default function AccountPage() {
                   </span>
                 )}
               </div>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full h-11 rounded-xl font-bold border-indigo-100 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200"
                 onClick={connectGmail}
-                disabled={loading}
+                disabled={connectLoading}
               >
-                {loading ? "Connecting..." : "Connect Workspace"}
+                {connectLoading ? "Connecting..." : "Connect Workspace"}
               </Button>
             </div>
           </div>
         </section>
 
-        {/* Username Availability Checker */}
         <section className="bg-white rounded-[2.5rem] border border-slate-100 human-shadow p-8 space-y-6 md:col-span-2">
           <div className="space-y-2">
             <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
               <User size={20} className="text-indigo-600" />
               Profile Settings
             </h2>
-            <p className="text-sm text-slate-500">Check if your desired username is available for future updates.</p>
+            <p className="text-sm text-slate-500">Update your name or username. Current values are pre-filled for quick edits.</p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-slate-800">Desired Username</p>
-                <p className="text-xs text-slate-500">Type a username to verify its exact availability.</p>
+          <form onSubmit={handleProfileSubmit} className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-bold text-slate-800">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  value={nameInput}
+                  onChange={(e) => {
+                    setNameInput(e.target.value);
+                    if (nameError) setNameError("");
+                    if (formError) setFormError("");
+                  }}
+                  placeholder={user.name || "Enter your name"}
+                  className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                />
+                {nameError && <p className="text-xs text-rose-500">{nameError}</p>}
               </div>
-              {usernameStatus === "available" && <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200">Available</span>}
-              {usernameStatus === "taken" && <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-md border border-rose-200">Taken</span>}
-              {usernameStatus === "checking" && <span className="text-xs font-bold text-slate-500">Checking...</span>}
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <label htmlFor="username" className="text-sm font-bold text-slate-800">
+                    Username
+                  </label>
+                  {usernameStatus === "available" && (
+                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200">
+                      Available
+                    </span>
+                  )}
+                  {usernameStatus === "taken" && (
+                    <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-md border border-rose-200">
+                      Taken
+                    </span>
+                  )}
+                  {usernameStatus === "checking" && <span className="text-xs font-bold text-slate-500">Checking...</span>}
+                </div>
+                <input
+                  id="username"
+                  type="text"
+                  value={usernameInput}
+                  onChange={(e) => {
+                    setUsernameInput(e.target.value);
+                    if (usernameError) setUsernameError("");
+                    if (formError) setFormError("");
+                  }}
+                  placeholder={user.username || "Enter your username"}
+                  className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                />
+                <p className="text-xs text-slate-500">We automatically check username availability after a short pause.</p>
+                {usernameError && <p className="text-xs text-rose-500">{usernameError}</p>}
+                {!usernameError && usernameStatus === "available" && usernameMessage && (
+                  <p className="text-xs text-emerald-600">{usernameMessage}</p>
+                )}
+              </div>
             </div>
-            <div className="relative">
-              <input 
-                type="text" 
-                value={usernameInput}
-                onChange={(e) => checkUsername(e.target.value)}
-                placeholder="e.g. johndoe99"
-                className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-              />
+
+            {formError && <p className="text-sm text-rose-600">{formError}</p>}
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
+              <p className="text-xs text-slate-500">
+                Only changed, non-empty fields are trimmed and sent in the update request.
+              </p>
+              <Button
+                type="submit"
+                className="min-w-48 h-11 rounded-xl font-bold"
+                disabled={profileLoading || usernameStatus === "checking"}
+              >
+                {profileLoading ? (
+                  <span className="flex items-center gap-2">
+                    <LoaderCircle size={16} className="animate-spin" />
+                    Updating...
+                  </span>
+                ) : (
+                  "Update Profile"
+                )}
+              </Button>
             </div>
-            {usernameStatus === "error" && <p className="text-xs text-rose-500">{usernameMessage}</p>}
-          </div>
+          </form>
         </section>
       </div>
 
-      {/* Danger Zone */}
       <section className="bg-rose-50/30 rounded-[2.5rem] border border-rose-100/50 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-4 text-center md:text-left">
           <div className="p-3 bg-white rounded-2xl shadow-sm text-rose-500 border border-rose-100/50">
@@ -289,13 +446,13 @@ export default function AccountPage() {
             <p className="text-sm text-slate-500 font-medium">Terminate current session and logout safely.</p>
           </div>
         </div>
-        <Button 
-          variant="destructive" 
+        <Button
+          variant="destructive"
           className="bg-rose-600 hover:bg-rose-500 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-rose-600/20 active:scale-95 transition-all w-full md:w-auto"
           onClick={logout}
-          disabled={loading}
+          disabled={logoutLoading || securityLoading}
         >
-          Logout Now
+          {logoutLoading ? "Logging Out..." : "Logout Now"}
         </Button>
       </section>
     </div>

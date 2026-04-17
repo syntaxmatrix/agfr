@@ -26,7 +26,7 @@ export default function StatusPage() {
       setBackendMessage("Could not reach the backend server. Is it running?");
       console.error("Connection check failed:", err);
     }
-  }, [backendPort]);
+  }, []);
 
   useEffect(() => {
     checkConnection();

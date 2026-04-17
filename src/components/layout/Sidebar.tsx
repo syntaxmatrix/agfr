@@ -18,6 +18,7 @@ import Link from "next/link"
 import { ProductName } from "@/constant"
 import { useContext } from "react"
 import AuthContext from "@/context/AuthContext"
+import Image from "next/image"
 
 
 interface SidebarProps {
@@ -236,11 +237,9 @@ useEffect(() => {
           )}>
             <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden shrink-0 border-2 border-white shadow-sm">
               {hasProfileUrl ? (
-                <img
-                  src={user.profileURL as string}
+                <Image src={user.profileURL as string}
                   alt={user.name || "Profile picture"}
-                  className="w-full h-full object-cover"
-                />
+                  className="w-full h-full object-cover"/>
               ) : (
                 <User size={20} />
               )}
