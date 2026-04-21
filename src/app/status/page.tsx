@@ -7,7 +7,6 @@ import { ProductName , Version } from "@/constant"
 export default function StatusPage() {
   const [backendStatus, setBackendStatus] = useState<"pending" | "success" | "error">("pending");
   const [backendMessage, setBackendMessage] = useState<string>("");
-  const [backendPort, setBackendPort] = useState<number>(8000);
 
   const checkConnection = useCallback(async () => {
     setBackendStatus("pending");
@@ -96,7 +95,7 @@ export default function StatusPage() {
         </div>
 
         <div className="mt-10 pt-8 border-t border-slate-800 flex items-center justify-between">
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <button 
               onClick={() => setBackendPort(8000)}
               className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${backendPort === 8000 ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "bg-slate-800 text-slate-400 hover:text-white"}`}
@@ -109,7 +108,7 @@ export default function StatusPage() {
             >
               Port 3000
             </button>
-          </div>
+          </div> */}
           
           <button 
             onClick={checkConnection}

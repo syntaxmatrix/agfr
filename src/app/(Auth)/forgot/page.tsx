@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import axios from "@/lib/axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { GalleryVerticalEnd, Mail, ArrowLeft, ArrowRight } from "lucide-react";
+import { Mail, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,7 +50,7 @@ export default function ForgotPage() {
         <div className="flex justify-center gap-2 md:justify-start">
           <Link href="/" className="flex items-center gap-2 font-bold text-slate-900">
             <div className="flex size-8 items-center justify-center rounded-xl bg-slate-900 text-white shadow-lg">
-              <GalleryVerticalEnd size={20} />
+              <Sparkles size={20} />
             </div>
             {ProductName}.
           </Link>
