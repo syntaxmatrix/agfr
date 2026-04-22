@@ -5,3 +5,5 @@ export const BACKEND_GOOGLE_GMAIL_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/
 export const ProductName = "Syntx AI";
 
 export const Version = "0.2.0";
+
+export const supportEmail = "support.agent@syntx.ai";
