@@ -141,7 +141,7 @@ useEffect(() => {
     >
       {/* Sidebar Header: Logo & Toggle */}
       <div className="h-20 flex items-center justify-between px-4 md:px-5 shrink-0">
-        <Link href="/" className={cn("flex items-center gap-3 transition-opacity duration-300", !isOpen && "md:opacity-0 md:pointer-events-none")}>
+        <Link href="/dashboard" className={cn("flex items-center gap-3 transition-opacity duration-300", !isOpen && "md:opacity-0 md:pointer-events-none")}>
           <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-lg active:scale-95 transition-transform">
             <Sparkles size={20} />
           </div>

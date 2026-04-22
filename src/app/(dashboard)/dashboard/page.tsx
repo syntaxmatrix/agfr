@@ -11,7 +11,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
-// import "./dashboard.css";
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const userName = user?.name || "Agentic AI";
@@ -42,7 +42,6 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8 md:gap-12 pt-2 md:pt-4 pb-16 md:pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Hero Section */}
       <section className="relative w-full rounded-[2rem] md:rounded-[2.5rem] bg-gradient-to-br from-slate-50 to-white border border-white/50 human-shadow overflow-hidden group hero-section px-5 py-8 sm:px-6 md:px-10 md:py-12 lg:px-14 lg:py-14">
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-10">
           <div className="flex-1 space-y-8 text-center md:text-left hero-content">
@@ -57,8 +56,6 @@ export default function DashboardPage() {
             <p className="hero-desc fade-in delay-200">
               Explore your personalized workspace where creativity meets productivity. Your AI assistant is ready to help you build the future.
             </p>
-
-            {/* Instructional Text */}
             <p className="info-text fade-in delay-300">
               To send email or chat, click on &quot;New Chat&quot;
             </p>
@@ -74,7 +71,6 @@ export default function DashboardPage() {
                 priority
               />
 
-              {/* Floating Chat Bubble */}
               <div className="absolute top-2 -right-2 sm:-top-4 sm:-right-2 md:top-10 md:right-0 bg-white px-3 py-2.5 sm:p-4 rounded-2xl rounded-tr-none human-shadow border border-slate-100/50 animate-bounce-slow max-w-[180px] sm:max-w-none">
                 <p className="text-xs sm:text-sm font-semibold text-slate-800">How can I help you?</p>
                 <div className="absolute top-0 right-0 w-3 h-3 bg-white border-t border-r border-slate-100/50 rotate-45 translate-x-1/2 -translate-y-1/2"></div>
@@ -83,12 +79,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Decorative elements for 'human-crafted' feel */}
         <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-slate-100/30 rounded-full blur-3xl -z-0"></div>
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/20 rounded-full blur-3xl -z-0"></div>
       </section>
 
-      {/* Feature Cards Grid */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8">
         {features.map((feature, idx) => (
           <div
@@ -113,7 +107,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Organic imperfection line */}
             <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-20 transition-opacity">
               <ArrowUpRight size={24} className="text-slate-900" />
             </div>
@@ -121,8 +114,6 @@ export default function DashboardPage() {
           </div>
         ))}
       </section>
-
-      
     </div>
   )
 }

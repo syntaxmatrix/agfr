@@ -7,7 +7,8 @@ import { ProductName, Version } from "@/constant"
 
 export const metadata = {
   title: `${ProductName} - Assistant ${Version}`,
-  description: "Modern SaaS AI assistant for achieving great things.",
+  description:
+    "Syntx AI is an AI-powered assistant that helps users send emails and perform tasks using natural language.",
 };
 
 export default function RootLayout({
