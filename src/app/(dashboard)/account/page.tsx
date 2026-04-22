@@ -1,5 +1,5 @@
 "use client"
-
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 import { toast } from "sonner";
@@ -455,6 +455,7 @@ export default function AccountPage() {
           {logoutLoading ? "Logging Out..." : "Logout Now"}
         </Button>
       </section>
+      <div>See our <Link href={"/privacy"} className="underline">Privacy Policy</Link> and <Link href={"/terms"} className="underline">Terms & Conditions</Link>.</div>
     </div>
   );
 }

@@ -237,7 +237,7 @@ useEffect(() => {
           )}>
             <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden shrink-0 border-2 border-white shadow-sm">
               {hasProfileUrl ? (
-                <Image src={user.profileURL as string}
+                <Image width={20} height={20} src={user.profileURL as string}
                   alt={user.name || "Profile picture"}
                   className="w-full h-full object-cover"/>
               ) : (

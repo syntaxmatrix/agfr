@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -172,6 +172,8 @@ export function RegisterForm({
                 Continue
               </Button>
             </Field>
+
+            <div>By Registering, you agree to our <Link href={"/privacy"} className="underline">Privacy Policy</Link> and <Link href={"/terms"} className="underline">Terms & Conditions</Link>.</div>
           </>
         )}
 
