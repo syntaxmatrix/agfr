@@ -12,7 +12,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import axios from "@/lib/axios"
-import { useRouter} from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import Link from "next/link"
 import { ProductName } from "@/constant"
@@ -29,6 +29,12 @@ interface SidebarProps {
 type HistoryItem = {
   _id: string;
   latestMessage?: string;
+  title?: string;
+  query?: string;
+  messages?: Array<{
+    role?: string;
+    content?: unknown;
+  }>;
 };
 
 type HistoryResponse = {
@@ -40,21 +46,47 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
   const auth = useContext(AuthContext);
   const isAuthenticated = auth?.isAuthenticated ?? false;
   const user = auth?.user ?? null;
+  const searchParams = useSearchParams();
   const hasProfileUrl =
     typeof user?.profileURL === "string" &&
     user.profileURL.trim() !== "" &&
     user.profileURL.trim().toLowerCase() !== "null";
   const refresh = auth?.refresh ?? (async () => {});
   const router = useRouter();
-const [currentConversationId, setCurrentConversationId] = React.useState<string | null>(null);
-
-useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
-  setCurrentConversationId(params.get("conversationId"));
-}, []);
+  const [currentConversationId, setCurrentConversationId] = React.useState<string | null>(null);
 
   const [recentHistory, setRecentHistory] = useState<HistoryItem[]>([]);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [historyError, setHistoryError] = useState(false);
+
+  useEffect(() => {
+    setCurrentConversationId(searchParams?.get("conversationId") ?? null);
+  }, [searchParams]);
+
+  const getHistoryLabel = (chat: HistoryItem) => {
+    if (typeof chat.latestMessage === "string" && chat.latestMessage.trim()) {
+      return chat.latestMessage.trim();
+    }
+
+    if (typeof chat.title === "string" && chat.title.trim()) {
+      return chat.title.trim();
+    }
+
+    if (typeof chat.query === "string" && chat.query.trim()) {
+      return chat.query.trim();
+    }
+
+    const firstTextMessage = chat.messages?.find((message) => {
+      if (typeof message.content !== "string") return false;
+      return message.content.trim().length > 0;
+    });
+
+    if (typeof firstTextMessage?.content === "string") {
+      return firstTextMessage.content.trim();
+    }
+
+    return "New Chat";
+  };
 
   const getDeletedIds = (): string[] => {
     const raw = localStorage.getItem("deletedIds") || "[]";
@@ -94,7 +126,8 @@ useEffect(() => {
     if (isAuthenticated) {
       const fetchHistory = async () => {
         try {
-          const res = await axios.get<HistoryResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/history`, {
+          setHistoryError(false);
+          const res = await axios.get<HistoryResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/history`, {
             withCredentials: true
           });
           if (res.data?.ok) {
@@ -104,8 +137,12 @@ useEffect(() => {
               (item) => !deletedIds.includes(item._id)
             );
             setRecentHistory(filteredData);
+          } else {
+            setRecentHistory([]);
           }
         } catch (err) {
+          setHistoryError(true);
+          setRecentHistory([]);
           console.warn("Failed to load history", err);
         }
       };
@@ -175,6 +212,14 @@ useEffect(() => {
           <div className="mb-4">
             <h3 className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Recent Activity</h3>
             <div className="space-y-1">
+              {!historyError && recentHistory.length === 0 && (
+                <p className="px-3 py-2 text-sm text-slate-400">No chat threads yet.</p>
+              )}
+
+              {historyError && (
+                <p className="px-3 py-2 text-sm text-red-500">Unable to load chat history.</p>
+              )}
+
               {recentHistory.map((chat, idx) => {
                 const isActive = currentConversationId === chat._id;
                 return (
@@ -194,7 +239,7 @@ useEffect(() => {
                       className="flex-1 flex items-center gap-3 overflow-hidden cursor-pointer"
                     >
                       <MessageSquare size={16} className={cn("shrink-0", isActive ? "text-slate-900" : "text-slate-300 group-hover:text-slate-400")} />
-                      <span className="truncate">{typeof chat.latestMessage === "string" ? chat.latestMessage : "New Chat"}</span>
+                      <span className="truncate">{getHistoryLabel(chat)}</span>
                     </div>
 
                     <button
