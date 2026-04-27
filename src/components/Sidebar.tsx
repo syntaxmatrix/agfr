@@ -30,7 +30,7 @@ export default function Sidebar({ history, isCollapsed, setIsCollapsed, isOpen }
       {/* Header */}
       <div className="p-4 flex items-center justify-between h-16 border-b border-slate-800/50">
         {!isCollapsed && (
-          <Link href="/" className="flex items-center gap-2 text-white font-bold tracking-tight truncate">
+          <Link href="/dashboard" className="flex items-center gap-2 text-white font-bold tracking-tight truncate">
             <Zap className="fill-indigo-500 text-indigo-500" size={17} />
             <span className="text-sm">{ProductName}</span>
           </Link>
