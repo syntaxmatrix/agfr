@@ -64,10 +64,6 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
   }, [searchParams]);
 
   const getHistoryLabel = (chat: HistoryItem) => {
-    if (typeof chat.latestMessage === "string" && chat.latestMessage.trim()) {
-      return chat.latestMessage.trim();
-    }
-
     if (typeof chat.title === "string" && chat.title.trim()) {
       return chat.title.trim();
     }
@@ -76,13 +72,18 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
       return chat.query.trim();
     }
 
-    const firstTextMessage = chat.messages?.find((message) => {
+    const firstUserTextMessage = chat.messages?.find((message) => {
+      if (message.role !== "user") return false;
       if (typeof message.content !== "string") return false;
       return message.content.trim().length > 0;
     });
 
-    if (typeof firstTextMessage?.content === "string") {
-      return firstTextMessage.content.trim();
+    if (typeof firstUserTextMessage?.content === "string") {
+      return firstUserTextMessage.content.trim();
+    }
+
+    if (typeof chat.latestMessage === "string" && chat.latestMessage.trim()) {
+      return chat.latestMessage.trim();
     }
 
     return "New Chat";
