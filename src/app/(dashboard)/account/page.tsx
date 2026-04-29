@@ -3,7 +3,7 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter , useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
   User,
@@ -61,6 +61,32 @@ export default function AccountPage() {
     setNameInput(user.name || "");
     setUsernameInput(user.username || "");
   }, [user]);
+
+  // Inside AccountPage(), after your state declarations:
+const searchParams = useSearchParams();
+
+useEffect(() => {
+  const linked = searchParams.get("linked");
+  const message = searchParams.get("message");
+
+  if (linked === null) return;
+
+  if (linked === "true") {
+    toast.success("Google Account Linked", {
+      description: message || "Google account linked successfully.",
+    });
+  } else {
+    toast.error("Linking Failed", {
+      description: message || "Failed to link Google account.",
+    });
+  }
+
+  // Clean up the URL so the toast doesn't re-fire on refresh
+  const url = new URL(window.location.href);
+  url.searchParams.delete("linked");
+  url.searchParams.delete("message");
+  window.history.replaceState({}, "", url.toString());
+}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkUsernameAvailability = async (value: string) => {
     const trimmedUsername = value.trim();
