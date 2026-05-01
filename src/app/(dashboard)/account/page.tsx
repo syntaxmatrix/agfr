@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { ProductName, supportEmail } from "@/constant";
+import { ProductName, supportEmail ,subscriptionChangeEmailTemplateBody,subscriptionChangeEmailTemplateSubject } from "@/constant";
 
 export default function AccountPage() {
   const [securityLoading, setSecurityLoading] = useState(false);
@@ -269,6 +269,20 @@ export default function AccountPage() {
 
   if (!user) return null;
 
+  const subject = subscriptionChangeEmailTemplateSubject;
+
+  const body = encodeURIComponent(
+    subscriptionChangeEmailTemplateBody({
+      email: user.email,
+      currentPlan: user.subscription,
+      name: user.name,
+    })
+  );
+
+  const mailtoLink = `mailto:${supportEmail}?subject=${encodeURIComponent(
+    subject
+  )}&body=${body}`;
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <section className="bg-white rounded-[2.5rem] border border-slate-100 human-shadow p-8 md:p-12">
@@ -348,11 +362,10 @@ export default function AccountPage() {
               Upgrade, downgrade, or cancel your current plan.
             </p>
           </div>
-
           <div className="space-y-4 pt-2 flex items-center">
             <div>
               <Link
-                href={`mailto:${supportEmail}?subject=Request%20to%20%5BUpgrade%20%2F%20Downgrade%20%2F%20Cancel%5D%20Subscription%20Plan&body=Hi%20Syntx%20Support%20Team%2C%0D%0AI%20am%20writing%20to%20request%20a%20change%20to%20the%20subscription%20plan%20for%20my%20account%20associated%20with%20this%20email%20address%20%28%5BYour%20Account%20Email%5D%29.%0D%0ACurrently%2C%20I%20am%20on%20the%20%5BCurrent%20Plan%20Name%5D%20plan.%20I%20would%20like%20to%20%5BUpgrade%20to%20%2F%20Downgrade%20to%20%2F%20Cancel%20and%20move%20to%5D%20the%20%5BNew%20Plan%20Name%20%2F%20Free%20Plan%5D.%0D%0ACould%20you%20please%20process%20this%20change%20and%20let%20me%20know%20if%20there%20are%20any%20prorated%20charges%2C%20refunds%2C%20or%20further%20steps%20I%20need%20to%20take%20on%20my%20end%3F%0D%0AHere%20are%20my%20account%20details%20for%20reference%3A%0D%0A%0D%0AAccount%20Name%3A%20%5BYour%20Name%5D%0D%0AAccount%20Email%3A%20%5BYour%20Account%20Email%5D%0D%0ACurrent%20Plan%3A%20%5BCurrent%20Plan%20Name%5D%0D%0AThank%20you%20for%20your%20assistance.%0D%0ABest%20regards%2C%0D%0A%5BYour%20Name%5D`}
+                href={mailtoLink}
                 className="inline-flex items-center gap-3 w-fit px-7 py-2 bg-[#c2d4ff] rounded-full text-[17px] font-bold text-black uppercase tracking-widest border border-slate-200/50 hover:bg-[#709bff] transition-colors"
               >
                 <Mail className="w-5 h-5" />
