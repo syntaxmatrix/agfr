@@ -6,7 +6,7 @@ export const ProductName = "Syntx AI";
 
 export const Version = "0.2.0";
 
-export const supportEmail = "support.agent@syntx.ai";
+export const supportEmail = "support.agent@syntx.in";
 
 export const subscriptionChangeEmailTemplateSubject = "Request for Subscription Plan Change - Syntx AI Account";
 
