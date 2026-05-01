@@ -174,22 +174,32 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
     <aside 
       className={cn(
         "fixed left-0 top-0 h-screen bg-white border-r border-slate-200 z-50 flex flex-col transition-all duration-300 ease-in-out",
-        isOpen ? "w-[min(18rem,88vw)] md:w-64 translate-x-0" : "-translate-x-full md:w-20 md:translate-x-0"
+        isOpen
+          ? "w-[min(18rem,88vw)] md:w-[var(--dashboard-sidebar-expanded)] translate-x-0"
+          : "-translate-x-full md:w-[var(--dashboard-sidebar-collapsed)] md:translate-x-0"
       )}
     >
       {/* Sidebar Header: Logo & Toggle */}
-      <div className="h-20 flex items-center justify-between px-4 md:px-5 shrink-0">
-        <Link href="/dashboard" className={cn("flex items-center gap-3 transition-opacity duration-300", !isOpen && "md:opacity-0 md:pointer-events-none")}>
+      <div
+        className={cn(
+          "shrink-0 border-b border-slate-100/80",
+          isOpen
+            ? "h-20 flex items-center justify-between px-4 md:px-5"
+            : "hidden md:flex md:flex-col md:items-center md:gap-4 md:px-3 md:py-5"
+        )}
+      >
+        <Link href="/dashboard" className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-lg active:scale-95 transition-transform">
             <Sparkles size={20} />
           </div>
-          <span className="font-bold text-slate-800 text-lg tracking-tight">{ProductName}</span>
+          {isOpen && <span className="font-bold text-slate-800 text-lg tracking-tight">{ProductName}</span>}
         </Link>
         <button 
+          type="button"
           onClick={toggle}
           className={cn(
-            "p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-900",
-            !isOpen && "md:mx-auto"
+            "flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-900",
+            !isOpen && "md:self-center"
           )}
         >
           <PanelLeft size={20} />
@@ -197,10 +207,10 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
       </div>
 
       {/* Action: New Chat */}
-      <div className="px-4 mb-5 md:mb-6 shrink-0">
+      <div className={cn("mb-5 md:mb-6 shrink-0", isOpen ? "px-4 pt-5" : "px-3 pt-5 md:px-2")}>
         <Link href="/chats" className={cn(
           "w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-all shadow-md active:scale-95",
-          !isOpen && "md:justify-center md:px-0 shrink-0"
+          !isOpen && "md:h-14 md:justify-center md:px-0"
         )}>
           <Plus size={20} />
           {isOpen && <span>New Chat</span>}
@@ -208,7 +218,12 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
       </div>
 
       {/* Recent History - Scrollable */}
-      <div className="flex-1 overflow-y-auto px-4 space-y-1 py-4 border-t border-slate-100">
+      <div
+        className={cn(
+          "flex-1 overflow-y-auto space-y-1 py-4 border-t border-slate-100",
+          isOpen ? "px-4" : "px-2"
+        )}
+      >
         {isOpen && (
           <div className="mb-4">
             <h3 className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Recent Activity</h3>
@@ -275,11 +290,11 @@ export default function Sidebar({ isOpen, toggle }: SidebarProps) {
       </div>
 
       {/* Bottom Profile Section */}
-      <div className="p-4 border-t border-slate-100 shrink-0">
+      <div className={cn("border-t border-slate-100 shrink-0", isOpen ? "p-4" : "p-3")}>
         {isAuthenticated && user ? (
           <div className={cn(
             "flex items-center gap-3 p-2 rounded-2xl bg-slate-50 border border-slate-200/50 group",
-            !isOpen && "md:justify-center md:border-none md:bg-transparent"
+            !isOpen && "md:justify-center md:border-none md:bg-transparent md:px-0"
           )}>
             <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden shrink-0 border-2 border-white shadow-sm">
               {hasProfileUrl ? (

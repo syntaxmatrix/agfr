@@ -32,6 +32,8 @@
 
 :root {
   --radius: 1rem;
+  --dashboard-sidebar-expanded: 18rem;
+  --dashboard-sidebar-collapsed: 6rem;
   /* Human-crafted neutralized palette */
   --background: #fdfdfd;
   --foreground: #1e293b;
@@ -147,7 +149,9 @@
 
 /* ChatGPT style sidebar transition */
 .sidebar-transition {
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Auth Pages Layout custom classes */

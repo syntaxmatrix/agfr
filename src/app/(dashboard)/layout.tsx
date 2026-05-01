@@ -34,10 +34,12 @@ export default function DashboardLayout({
       <div 
         className={cn(
           "flex-1 flex flex-col h-screen sidebar-transition",
-          isSidebarOpen ? "md:pl-64" : "md:pl-20"
+          isSidebarOpen
+            ? "md:pl-[var(--dashboard-sidebar-expanded)]"
+            : "md:pl-[var(--dashboard-sidebar-collapsed)]"
         )}
       >
-        <Header />
+        <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
         
         <main className="flex-1 overflow-y-auto custom-scrollbar">
           <div className="max-w-[1400px] mx-auto px-4 py-4 sm:px-5 md:p-8 lg:p-10 pb-24 md:pb-32">
