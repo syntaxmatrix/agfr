@@ -39,6 +39,11 @@ type AgentAnswer = {
   to?: string;
   body?: unknown;
   text?: string;
+  status?: string;
+  type?: string;
+  draft?: boolean;
+  emailType?: string;
+  result?: string;
 };
 
 type AgentChatResponse = {
@@ -48,20 +53,132 @@ type AgentChatResponse = {
 
 const LOADING_MESSAGES = ["Generating...", "Working...", "Loading...", "Thinking..."];
 
+function tryParseStructuredString(content: string): unknown {
+  const trimmed = content.trim();
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+    return content;
+  }
+
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return content;
+  }
+}
+
+function extractMessageText(content: unknown): string {
+  if (typeof content === "string") return content;
+  if (content === null || content === undefined) return "";
+  if (typeof content === "object") {
+    const maybeContent = content as AgentAnswer;
+    if (typeof maybeContent.body === "string") return maybeContent.body;
+    if (typeof maybeContent.text === "string") return maybeContent.text;
+    return JSON.stringify(content, null, 2);
+  }
+  return String(content);
+}
+
+function getEmailStatus(answer: AgentAnswer): "sent" | "draft" | null {
+  const normalizedStatus = [
+    answer.status,
+    answer.type,
+    answer.emailType,
+    answer.result,
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim().toLowerCase());
+
+  if (Array.isArray(answer.labelIds) && answer.labelIds.includes("SENT")) {
+    return "sent";
+  }
+
+  if (normalizedStatus.some((value) => value.includes("sent"))) {
+    return "sent";
+  }
+
+  if (answer.draft === true) {
+    return "draft";
+  }
+
+  if (normalizedStatus.some((value) => value.includes("draft"))) {
+    return "draft";
+  }
+
+  if (answer.subject !== undefined || answer.to !== undefined || answer.body !== undefined) {
+    return "draft";
+  }
+
+  return null;
+}
+
+function renderEmailCard(answer: AgentAnswer, status: "sent" | "draft") {
+  const badgeClassName =
+    status === "sent"
+      ? "bg-green-100 text-green-700"
+      : "bg-indigo-100 text-indigo-700";
+  const shellClassName =
+    status === "sent"
+      ? "bg-green-50 border-green-200"
+      : "bg-slate-50 border-slate-200";
+  const title = status === "sent" ? "Sent Email" : "Email Draft";
+  const badgeLabel = status === "sent" ? "SENT" : "DRAFT";
+  const body = extractMessageText(answer.body);
+
+  return (
+    <div className="flex flex-col gap-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className={cn("rounded-xl border p-4 shadow-sm w-full", shellClassName)}>
+        <div className="flex items-center gap-2 border-b border-slate-200 pb-2 mb-3">
+          <span className={cn("text-xs font-bold px-2 py-0.5 rounded-md", badgeClassName)}>{badgeLabel}</span>
+          <p className="text-sm font-semibold text-slate-800">{title}</p>
+        </div>
+
+        {(answer.to !== undefined || answer.subject !== undefined) && (
+          <div className="text-xs text-slate-500 space-y-1.5 mb-3 select-all">
+            {answer.to !== undefined && (
+              <p><strong className="text-slate-700">To:</strong> {answer.to || "[Not Specified]"}</p>
+            )}
+            {answer.subject !== undefined && (
+              <p><strong className="text-slate-700">Subject:</strong> {answer.subject || "[No Subject]"}</p>
+            )}
+          </div>
+        )}
+
+        {body && (
+          <div className="bg-white p-3 rounded-lg border border-slate-100 text-sm text-slate-700 whitespace-pre-wrap font-medium">
+            {body}
+          </div>
+        )}
+
+        {!body && status === "sent" && (
+          <div className="text-sm text-green-800 font-medium">Email sent to recipient.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function renderAgentContent(content: unknown): React.ReactNode {
+  const normalizedContent =
+    typeof content === "string" ? tryParseStructuredString(content) : content;
+
+  if (React.isValidElement(normalizedContent)) return normalizedContent;
+
+  if (typeof normalizedContent === "object" && normalizedContent !== null) {
+    const answer = normalizedContent as AgentAnswer;
+    const emailStatus = getEmailStatus(answer);
+
+    if (emailStatus) {
+      return renderEmailCard(answer, emailStatus);
+    }
+
+    return extractMessageText(answer);
+  }
+
+  return extractMessageText(normalizedContent);
+}
+
 export default function ChatWindow({ initialQuery, conversationId }: { initialQuery?: string, conversationId?: string }) {
   const router = useRouter();
-  function normalizeContent(content: unknown): React.ReactNode {
-    if (React.isValidElement(content)) return content;
-    if (typeof content === 'string') return content;
-    if (content === null || content === undefined) return '';
-    if (typeof content === 'object') {
-      const maybeContent = content as AgentAnswer;
-      if (typeof maybeContent.body === 'string') return maybeContent.body;
-      if (typeof maybeContent.text === 'string') return maybeContent.text;
-      return JSON.stringify(content, null, 2);
-    }
-    return String(content);
-  }
   const [messages, setMessages] = useState<ChatMessage[]>(
     initialQuery ? [{ from: "user", text: initialQuery }] : []
   );
@@ -101,7 +218,7 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
           if (res.data?.ok && res.data.messages) {
             setMessages(res.data.messages.map((m) => ({
               from: m.role === "ai" ? "agent" : "user",
-              text: normalizeContent(m.content)
+              text: m.role === "ai" ? renderAgentContent(m.content) : extractMessageText(m.content)
             })));
           }
         } catch (err) {
@@ -153,47 +270,7 @@ export default function ChatWindow({ initialQuery, conversationId }: { initialQu
         withCredentials: true 
       });
       const ans: unknown = res.data?.ans ?? res.data?.text ?? "I'm sorry, I couldn't process that.";
-
-      // Handle Email responses
-      if (ans && typeof ans === 'object') {
-        const answer = ans as AgentAnswer;
-        // Sent confirmation from Gmail API (has labelIds with SENT)
-        if (Array.isArray(answer.labelIds) && answer.labelIds.includes('SENT')) {
-          const sentText = (
-            <div className="flex flex-col gap-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="bg-green-50 border border-green-200 rounded-xl p-3 shadow-sm w-full flex items-center justify-between">
-                <div className="text-sm text-green-800 font-medium">Email sent to recipient.</div>
-                <div className="text-xs text-green-700 opacity-80">Sent</div>
-              </div>
-            </div>
-          );
-          setMessages((s) => [...s, { from: "agent", text: sentText }]);
-        } else if (answer.subject !== undefined && answer.to !== undefined && answer.body) {
-          // Format as an email draft visualization
-          const jsx = (
-            <div className="flex flex-col gap-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm w-full">
-                <div className="flex items-center gap-2 border-b border-slate-200 pb-2 mb-3">
-                  <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-md">DRAFT</span>
-                  <p className="text-sm font-semibold text-slate-800">New Email</p>
-                </div>
-                <div className="text-xs text-slate-500 space-y-1.5 mb-3 select-all">
-                  <p><strong className="text-slate-700">To:</strong> {answer.to || "[Not Specified]"}</p>
-                  <p><strong className="text-slate-700">Subject:</strong> {answer.subject}</p>
-                </div>
-                <div className="bg-white p-3 rounded-lg border border-slate-100 text-sm text-slate-700 whitespace-pre-wrap font-medium">
-                  {normalizeContent(answer.body)}
-                </div>
-              </div>
-            </div>
-          );
-          setMessages((s) => [...s, { from: "agent", text: jsx }]);
-        } else {
-          setMessages((s) => [...s, { from: "agent", text: normalizeContent(answer) }]);
-        }
-      } else {
-        setMessages((s) => [...s, { from: "agent", text: String(ans) }]);
-      }
+      setMessages((s) => [...s, { from: "agent", text: renderAgentContent(ans) }]);
 
       // Update URL to stay in this conversation context
       if (!conversationId) {
