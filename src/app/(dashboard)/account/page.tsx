@@ -19,7 +19,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { ProductName, supportEmail ,subscriptionChangeEmailTemplateBody,subscriptionChangeEmailTemplateSubject } from "@/constant";
+import {
+  ProductName,
+  supportEmail,
+  subscriptionChangeEmailTemplateBody,
+  subscriptionChangeEmailTemplateSubject,
+} from "@/constant";
 
 export default function AccountPage() {
   const [securityLoading, setSecurityLoading] = useState(false);
@@ -276,11 +281,11 @@ export default function AccountPage() {
       email: user.email,
       currentPlan: user.subscription,
       name: user.name,
-    })
+    }),
   );
 
   const mailtoLink = `mailto:${supportEmail}?subject=${encodeURIComponent(
-    subject
+    subject,
   )}&body=${body}`;
 
   return (
@@ -375,7 +380,7 @@ export default function AccountPage() {
           </div>
         </section>
 
-                <section className="bg-white rounded-[2.5rem] border border-slate-100 human-shadow p-8 space-y-6">
+        <section className="bg-white rounded-[2.5rem] border border-slate-100 human-shadow p-8 space-y-6">
           <div className="space-y-2">
             <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
               <Globe size={20} className="text-indigo-600" />
@@ -423,7 +428,7 @@ export default function AccountPage() {
             </div>
           </div>
         </section>
-        
+
         <section className="bg-white rounded-[2.5rem] border border-slate-100 human-shadow p-8 space-y-6">
           <div className="space-y-2">
             <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
@@ -601,17 +606,27 @@ export default function AccountPage() {
           {logoutLoading ? "Logging Out..." : "Logout Now"}
         </Button>
       </section>
-      <div>
-        See our{" "}
-        <Link href={"/privacy"} className="underline">
-          Privacy Policy
-        </Link>{" "}
-        and{" "}
-        <Link href={"/terms"} className="underline">
-          Terms & Conditions
-        </Link>
-        .
-      </div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4 sm:gap-0">
+  <div className="text-sm text-gray-600">
+    See our{" "}
+    <Link href={"/privacy"} className="underline">
+      Privacy Policy
+    </Link>{" "}
+    and{" "}
+    <Link href={"/terms"} className="underline">
+      Terms & Conditions
+    </Link>
+    .
+  </div>
+
+  <Link
+    href={`mailto:${supportEmail}`}
+    className="inline-flex items-center gap-3 w-fit px-5 py-1 bg-slate-200 rounded-full text-[10px] font-bold text-black uppercase tracking-widest border border-slate-200/50"
+  >
+    <Mail className="w-5 h-5" />
+    {supportEmail}
+  </Link>
+</div>
     </div>
   );
 }
