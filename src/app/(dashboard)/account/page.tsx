@@ -1,9 +1,9 @@
-"use client"
+"use client";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 import { toast } from "sonner";
-import { useRouter , useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
   User,
@@ -15,10 +15,11 @@ import {
   ArrowRight,
   ShieldAlert,
   LoaderCircle,
+  IndianRupee,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { ProductName } from "@/constant";
+import { ProductName, supportEmail } from "@/constant";
 
 export default function AccountPage() {
   const [securityLoading, setSecurityLoading] = useState(false);
@@ -27,7 +28,9 @@ export default function AccountPage() {
   const [profileLoading, setProfileLoading] = useState(false);
   const [nameInput, setNameInput] = useState("");
   const [usernameInput, setUsernameInput] = useState("");
-  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken" | "error">("idle");
+  const [usernameStatus, setUsernameStatus] = useState<
+    "idle" | "checking" | "available" | "taken" | "error"
+  >("idle");
   const [usernameMessage, setUsernameMessage] = useState("");
   const [nameError, setNameError] = useState("");
   const [usernameError, setUsernameError] = useState("");
@@ -44,9 +47,13 @@ export default function AccountPage() {
       typeof err === "object" &&
       err !== null &&
       "response" in err &&
-      typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message === "string"
+      typeof (err as { response?: { data?: { message?: string } } }).response
+        ?.data?.message === "string"
     ) {
-      return (err as { response?: { data?: { message?: string } } }).response?.data?.message ?? fallback;
+      return (
+        (err as { response?: { data?: { message?: string } } }).response?.data
+          ?.message ?? fallback
+      );
     }
 
     if (err instanceof Error) {
@@ -63,30 +70,30 @@ export default function AccountPage() {
   }, [user]);
 
   // Inside AccountPage(), after your state declarations:
-const searchParams = useSearchParams();
+  const searchParams = useSearchParams();
 
-useEffect(() => {
-  const linked = searchParams.get("linked");
-  const message = searchParams.get("message");
+  useEffect(() => {
+    const linked = searchParams.get("linked");
+    const message = searchParams.get("message");
 
-  if (linked === null) return;
+    if (linked === null) return;
 
-  if (linked === "true") {
-    toast.success("Google Account Linked", {
-      description: message || "Google account linked successfully.",
-    });
-  } else {
-    toast.error("Linking Failed", {
-      description: message || "Failed to link Google account.",
-    });
-  }
+    if (linked === "true") {
+      toast.success("Google Account Linked", {
+        description: message || "Google account linked successfully.",
+      });
+    } else {
+      toast.error("Linking Failed", {
+        description: message || "Failed to link Google account.",
+      });
+    }
 
-  // Clean up the URL so the toast doesn't re-fire on refresh
-  const url = new URL(window.location.href);
-  url.searchParams.delete("linked");
-  url.searchParams.delete("message");
-  window.history.replaceState({}, "", url.toString());
-}, []); // eslint-disable-line react-hooks/exhaustive-deps
+    // Clean up the URL so the toast doesn't re-fire on refresh
+    const url = new URL(window.location.href);
+    url.searchParams.delete("linked");
+    url.searchParams.delete("message");
+    window.history.replaceState({}, "", url.toString());
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkUsernameAvailability = async (value: string) => {
     const trimmedUsername = value.trim();
@@ -181,7 +188,8 @@ useEffect(() => {
     }
 
     if (trimmedUsername && trimmedUsername !== currentUsername) {
-      const isUsernameAvailable = await checkUsernameAvailability(trimmedUsername);
+      const isUsernameAvailable =
+        await checkUsernameAvailability(trimmedUsername);
       if (!isUsernameAvailable) {
         return;
       }
@@ -236,14 +244,16 @@ useEffect(() => {
     try {
       const res = await axios.get("/api/user/email");
       const encryptedEmail = res.data?.data?.email || res.data?.email;
-      if (!encryptedEmail) throw new Error("Encrypted email not returned from backend");
+      if (!encryptedEmail)
+        throw new Error("Encrypted email not returned from backend");
       window.location.href = `/api/user/gmail?email=${encodeURIComponent(encryptedEmail)}`;
     } catch (err: unknown) {
       if (
         typeof err === "object" &&
         err !== null &&
         "response" in err &&
-        typeof (err as { response?: { status?: number } }).response?.status === "number" &&
+        typeof (err as { response?: { status?: number } }).response?.status ===
+          "number" &&
         (err as { response?: { status?: number } }).response?.status === 401
       ) {
         router.push("/login");
@@ -283,13 +293,17 @@ useEffect(() => {
             <div>
               <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center justify-center md:justify-start gap-2">
                 {user.name}
-                {user.isVerified && <CheckCircle2 size={20} className="text-emerald-500" />}
+                {user.isVerified && (
+                  <CheckCircle2 size={20} className="text-emerald-500" />
+                )}
               </h1>
               <p className="text-slate-500 font-medium flex items-center justify-center md:justify-start gap-1.5 pt-1">
                 <Mail size={16} className="text-slate-400" />
                 {user.email}
               </p>
-              <p className="text-slate-400 text-sm font-semibold pt-1">@{user.username || "username"}</p>
+              <p className="text-slate-400 text-sm font-semibold pt-1">
+                @{user.username || "username"}
+              </p>
             </div>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
               <span className="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest border border-slate-200/50">
@@ -301,6 +315,23 @@ useEffect(() => {
                   Verified
                 </span>
               )}
+
+              {user.subscription === "Free" && (
+                <span className="px-3 py-1 bg-[#E2FDFF] rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest border border-slate-200/50">
+                  Plan : {user.subscription?.toUpperCase()}
+                </span>
+              )}
+              {user.subscription === "Premium" && (
+                <span className="px-3 py-1 bg-[#3772FF] rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-slate-200/50">
+                  Plan : {user.subscription?.toUpperCase()}
+                </span>
+              )}
+
+              {user.subscription === "Ultimate" && (
+                <span className="px-3 py-1 bg-[#DF2935] rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-slate-200/50">
+                  Plan : {user.subscription?.toUpperCase()}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -310,47 +341,57 @@ useEffect(() => {
         <section className="bg-white rounded-[2.5rem] border border-slate-100 human-shadow p-8 space-y-6">
           <div className="space-y-2">
             <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
-              <ShieldAlert size={20} className="text-indigo-600" />
-              Security Settings
+              <IndianRupee size={20} className="text-indigo-600" />
+              Manage Subscription
             </h2>
-            <p className="text-sm text-slate-500">Manage your account access and verification methods.</p>
+            <p className="text-sm text-slate-500">
+              Upgrade, downgrade, or cancel your current plan.
+            </p>
           </div>
 
-          <div className="space-y-4 pt-2">
-            <div
-              className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between group hover:bg-white hover:shadow-lg hover:border-slate-200 transition-all cursor-pointer"
-              onClick={() => {
-                void requestSecurityCode();
-                router.push("/reset");
-              }}
-            >
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-slate-800">Reset Password</p>
-                <p className="text-xs text-slate-500">Initiate a password reset flow</p>
-              </div>
-              <ArrowRight size={18} className="text-slate-300 group-hover:text-slate-900 transition-colors" />
+          <div className="space-y-4 pt-2 flex items-center">
+            <div>
+              <Link
+                href={`mailto:${supportEmail}?subject=Request%20to%20%5BUpgrade%20%2F%20Downgrade%20%2F%20Cancel%5D%20Subscription%20Plan&body=Hi%20Syntx%20Support%20Team%2C%0D%0AI%20am%20writing%20to%20request%20a%20change%20to%20the%20subscription%20plan%20for%20my%20account%20associated%20with%20this%20email%20address%20%28%5BYour%20Account%20Email%5D%29.%0D%0ACurrently%2C%20I%20am%20on%20the%20%5BCurrent%20Plan%20Name%5D%20plan.%20I%20would%20like%20to%20%5BUpgrade%20to%20%2F%20Downgrade%20to%20%2F%20Cancel%20and%20move%20to%5D%20the%20%5BNew%20Plan%20Name%20%2F%20Free%20Plan%5D.%0D%0ACould%20you%20please%20process%20this%20change%20and%20let%20me%20know%20if%20there%20are%20any%20prorated%20charges%2C%20refunds%2C%20or%20further%20steps%20I%20need%20to%20take%20on%20my%20end%3F%0D%0AHere%20are%20my%20account%20details%20for%20reference%3A%0D%0A%0D%0AAccount%20Name%3A%20%5BYour%20Name%5D%0D%0AAccount%20Email%3A%20%5BYour%20Account%20Email%5D%0D%0ACurrent%20Plan%3A%20%5BCurrent%20Plan%20Name%5D%0D%0AThank%20you%20for%20your%20assistance.%0D%0ABest%20regards%2C%0D%0A%5BYour%20Name%5D`}
+                className="inline-flex items-center gap-3 w-fit px-7 py-2 bg-[#c2d4ff] rounded-full text-[17px] font-bold text-black uppercase tracking-widest border border-slate-200/50 hover:bg-[#709bff] transition-colors"
+              >
+                <Mail className="w-5 h-5" />
+                Contact us
+              </Link>
             </div>
           </div>
         </section>
 
-        <section className="bg-white rounded-[2.5rem] border border-slate-100 human-shadow p-8 space-y-6">
+                <section className="bg-white rounded-[2.5rem] border border-slate-100 human-shadow p-8 space-y-6">
           <div className="space-y-2">
             <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
               <Globe size={20} className="text-indigo-600" />
               Connected Apps
             </h2>
-            <p className="text-sm text-slate-500">Sync your external services with {ProductName}.</p>
+            <p className="text-sm text-slate-500">
+              Sync your external services with {ProductName}.
+            </p>
           </div>
 
           <div className="space-y-4 pt-2">
             <div className="p-5 rounded-2xl bg-slate-50 border border-emerald-100/50 flex flex-col gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center">
-                  <Image src="/google.png" alt="Google" className="w-6 h-6 " width={24} height={24} />
+                  <Image
+                    src="/google.png"
+                    alt="Google"
+                    className="w-6 h-6 "
+                    width={24}
+                    height={24}
+                  />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-slate-800">Google Inbox</p>
-                  <p className="text-xs text-slate-500 truncate">Manage emails with AI agents</p>
+                  <p className="text-sm font-bold text-slate-800">
+                    Google Inbox
+                  </p>
+                  <p className="text-xs text-slate-500 truncate">
+                    Manage emails with AI agents
+                  </p>
                 </div>
                 {user.googleConnected && (
                   <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">
@@ -369,6 +410,40 @@ useEffect(() => {
             </div>
           </div>
         </section>
+        
+        <section className="bg-white rounded-[2.5rem] border border-slate-100 human-shadow p-8 space-y-6">
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
+              <ShieldAlert size={20} className="text-indigo-600" />
+              Security Settings
+            </h2>
+            <p className="text-sm text-slate-500">
+              Manage your account access and verification methods.
+            </p>
+          </div>
+          <div className="space-y-4 pt-2">
+            <div
+              className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between group hover:bg-white hover:shadow-lg hover:border-slate-200 transition-all cursor-pointer"
+              onClick={() => {
+                void requestSecurityCode();
+                router.push("/reset");
+              }}
+            >
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-slate-800">
+                  Reset Password
+                </p>
+                <p className="text-xs text-slate-500">
+                  Initiate a password reset flow
+                </p>
+              </div>
+              <ArrowRight
+                size={18}
+                className="text-slate-300 group-hover:text-slate-900 transition-colors"
+              />
+            </div>
+          </div>
+        </section>
 
         <section className="bg-white rounded-[2.5rem] border border-slate-100 human-shadow p-8 space-y-6 md:col-span-2">
           <div className="space-y-2">
@@ -376,13 +451,22 @@ useEffect(() => {
               <User size={20} className="text-indigo-600" />
               Profile Settings
             </h2>
-            <p className="text-sm text-slate-500">Update your name or username. Current values are pre-filled for quick edits.</p>
+            <p className="text-sm text-slate-500">
+              Update your name or username. Current values are pre-filled for
+              quick edits.
+            </p>
           </div>
 
-          <form onSubmit={handleProfileSubmit} className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col gap-5">
+          <form
+            onSubmit={handleProfileSubmit}
+            className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col gap-5"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-bold text-slate-800">
+                <label
+                  htmlFor="name"
+                  className="text-sm font-bold text-slate-800"
+                >
                   Name
                 </label>
                 <input
@@ -397,12 +481,17 @@ useEffect(() => {
                   placeholder={user.name || "Enter your name"}
                   className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
                 />
-                {nameError && <p className="text-xs text-rose-500">{nameError}</p>}
+                {nameError && (
+                  <p className="text-xs text-rose-500">{nameError}</p>
+                )}
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-3">
-                  <label htmlFor="username" className="text-sm font-bold text-slate-800">
+                  <label
+                    htmlFor="username"
+                    className="text-sm font-bold text-slate-800"
+                  >
                     Username
                   </label>
                   {usernameStatus === "available" && (
@@ -415,7 +504,11 @@ useEffect(() => {
                       Taken
                     </span>
                   )}
-                  {usernameStatus === "checking" && <span className="text-xs font-bold text-slate-500">Checking...</span>}
+                  {usernameStatus === "checking" && (
+                    <span className="text-xs font-bold text-slate-500">
+                      Checking...
+                    </span>
+                  )}
                 </div>
                 <input
                   id="username"
@@ -429,11 +522,20 @@ useEffect(() => {
                   placeholder={user.username || "Enter your username"}
                   className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
                 />
-                <p className="text-xs text-slate-500">We automatically check username availability after a short pause.</p>
-                {usernameError && <p className="text-xs text-rose-500">{usernameError}</p>}
-                {!usernameError && usernameStatus === "available" && usernameMessage && (
-                  <p className="text-xs text-emerald-600">{usernameMessage}</p>
+                <p className="text-xs text-slate-500">
+                  We automatically check username availability after a short
+                  pause.
+                </p>
+                {usernameError && (
+                  <p className="text-xs text-rose-500">{usernameError}</p>
                 )}
+                {!usernameError &&
+                  usernameStatus === "available" &&
+                  usernameMessage && (
+                    <p className="text-xs text-emerald-600">
+                      {usernameMessage}
+                    </p>
+                  )}
               </div>
             </div>
 
@@ -441,7 +543,8 @@ useEffect(() => {
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
               <p className="text-xs text-slate-500">
-                Only changed, non-empty fields are trimmed and sent in the update request.
+                Only changed, non-empty fields are trimmed and sent in the
+                update request.
               </p>
               <Button
                 type="submit"
@@ -468,8 +571,12 @@ useEffect(() => {
             <LogOut size={24} />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900 leading-tight">Session Access</h3>
-            <p className="text-sm text-slate-500 font-medium">Terminate current session and logout safely.</p>
+            <h3 className="text-lg font-bold text-slate-900 leading-tight">
+              Session Access
+            </h3>
+            <p className="text-sm text-slate-500 font-medium">
+              Terminate current session and logout safely.
+            </p>
           </div>
         </div>
         <Button
@@ -481,7 +588,17 @@ useEffect(() => {
           {logoutLoading ? "Logging Out..." : "Logout Now"}
         </Button>
       </section>
-      <div>See our <Link href={"/privacy"} className="underline">Privacy Policy</Link> and <Link href={"/terms"} className="underline">Terms & Conditions</Link>.</div>
+      <div>
+        See our{" "}
+        <Link href={"/privacy"} className="underline">
+          Privacy Policy
+        </Link>{" "}
+        and{" "}
+        <Link href={"/terms"} className="underline">
+          Terms & Conditions
+        </Link>
+        .
+      </div>
     </div>
   );
 }
