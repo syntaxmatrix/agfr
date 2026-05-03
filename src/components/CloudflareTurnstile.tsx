@@ -28,7 +28,9 @@ type CloudflareTurnstileProps = {
   className?: string;
 };
 
-const TURNSTILE_SITE_KEY = process.env.TURNSTILE_SITE_KEY || "0x4AAAAAADIau--nRDc0o5Lh";
+const TURNSTILE_TEST_SITE_KEY = "1x00000000000000000000AA";
+const TURNSTILE_PRODUCTION_SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAADIau--nRDc0o5Lh";
 
 export default function CloudflareTurnstile({
   onVerify,
@@ -40,6 +42,20 @@ export default function CloudflareTurnstile({
   const widgetIdRef = useRef<string | null>(null);
   const hasRenderedRef = useRef(false);
   const [scriptReady, setScriptReady] = useState(false);
+
+  const getSiteKey = useCallback(() => {
+    if (typeof window === "undefined") {
+      return TURNSTILE_PRODUCTION_SITE_KEY;
+    }
+
+    const hostname = window.location.hostname;
+    const isLocalhost =
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "0.0.0.0";
+
+    return isLocalhost ? TURNSTILE_TEST_SITE_KEY : TURNSTILE_PRODUCTION_SITE_KEY;
+  }, []);
 
   const handleExpire = useCallback(() => {
     onExpire?.();
@@ -55,14 +71,14 @@ export default function CloudflareTurnstile({
 
     container.innerHTML = "";
     widgetIdRef.current = window.turnstile.render(container, {
-      sitekey: TURNSTILE_SITE_KEY,
+      sitekey: getSiteKey(),
       callback: onVerify,
       "expired-callback": handleExpire,
       "error-callback": handleExpire,
       theme: "light",
     });
     hasRenderedRef.current = true;
-  }, [containerId, handleExpire, onVerify, scriptReady]);
+  }, [containerId, getSiteKey, handleExpire, onVerify, scriptReady]);
 
   useEffect(() => {
     if (window.turnstile) {
