@@ -21,12 +21,14 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
+import CloudflareTurnstile from "@/components/CloudflareTurnstile";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
   const [isSubmiting,setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
   const router = useRouter();
   const { refresh } = useAuth();
   //zod
@@ -38,9 +40,16 @@ export function LoginForm({
     }
   });
   const onSubmit = async(data:LoginInput) => {
+    if (!turnstileToken) {
+      toast.error("Complete the verification challenge first.");
+      return;
+    }
     setIsSubmitting(true);
     try {
-      const response = await axios.post("/api/user/login",data); ///api/v1/user/login
+      const response = await axios.post("/api/user/login",{
+        ...data,
+        turnstileToken,
+      }); ///api/v1/user/login
       toast.success("You are Successfully Logged In",{
         description: response.data.message
       })
@@ -62,6 +71,15 @@ export function LoginForm({
       setIsSubmitting(false);
     }
   }
+
+  const handleGoogleLogin = () => {
+    if (!turnstileToken) {
+      toast.error("Complete the verification challenge first.");
+      return;
+    }
+    window.location.href = `/api/user/google?turnstileToken=${encodeURIComponent(turnstileToken)}`;
+  };
+
   return (
     <form className={cn("flex flex-col gap-6", className)} onSubmit={form.handleSubmit(onSubmit)} {...props}>
       <FieldGroup>
@@ -96,13 +114,20 @@ export function LoginForm({
           </div>
         </Field>
         <Field>
+          <CloudflareTurnstile
+            className="min-h-[65px]"
+            onVerify={setTurnstileToken}
+            onExpire={() => setTurnstileToken("")}
+          />
+        </Field>
+        <Field>
           <Button className="btn-primary" type="submit" disabled={isSubmiting}>
             {isSubmiting ? "Logging in..." : "Login"} 
           </Button>
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
         <Field>
-          <Button variant="outline" type="button" onClick={() => window.location.href = "/api/user/google"}>
+          <Button variant="outline" type="button" onClick={handleGoogleLogin}>
             <Image src="/google.png" alt="Google" width={16} height={16} />
             Login with Google
           </Button>

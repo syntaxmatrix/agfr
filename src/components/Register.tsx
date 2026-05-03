@@ -26,6 +26,7 @@ import { AxiosError } from "axios";
 import { toast } from "sonner"
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import CloudflareTurnstile from "@/components/CloudflareTurnstile";
 
 export function RegisterForm({
   className,
@@ -34,6 +35,7 @@ export function RegisterForm({
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
   const router = useRouter();
 
   const form = useForm<RegisterInput>({
@@ -46,6 +48,10 @@ export function RegisterForm({
   });
 
   const handleContinue = async () => {
+    if (!turnstileToken) {
+      toast.error("Complete the verification challenge first.");
+      return;
+    }
     const isEmailValid = await form.trigger("email");
     if (!isEmailValid) return;
     // Check email availability with backend
@@ -74,11 +80,16 @@ export function RegisterForm({
   };
 
   const handleRegister = async (data: RegisterInput) => {
+    if (!turnstileToken) {
+      toast.error("Complete the verification challenge first.");
+      return;
+    }
     setIsSubmitting(true);
     try {
       const response = await axios.post("/api/user/register", {
         email: data.email,
         password: data.password,
+        turnstileToken,
       });
       toast.success("Verification Email Sent", {
         description: response.data.message,
@@ -96,6 +107,14 @@ export function RegisterForm({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleGoogleRegister = () => {
+    if (!turnstileToken) {
+      toast.error("Complete the verification challenge first.");
+      return;
+    }
+    window.location.href = `/api/user/google?turnstileToken=${encodeURIComponent(turnstileToken)}`;
   };
 
   const handleVerifyEmail = async () => {
@@ -146,13 +165,21 @@ export function RegisterForm({
         {step === 1 && (
           <>
             <Field>
-              <Button variant="outline" type="button" onClick={() => window.location.href = "/api/user/google"}>
+              <Button variant="outline" type="button" onClick={handleGoogleRegister}>
                 <Image src="/google.png" alt="Google" width={16} height={16} className="mr-2" />
                 Register with Google
               </Button>
             </Field>
 
             <FieldSeparator>Or continue with</FieldSeparator>
+
+            <Field>
+              <CloudflareTurnstile
+                className="min-h-[65px]"
+                onVerify={setTurnstileToken}
+                onExpire={() => setTurnstileToken("")}
+              />
+            </Field>
 
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
