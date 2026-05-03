@@ -50,7 +50,7 @@ export function LoginForm({
         ...data,
         turnstileToken,
       }); ///api/v1/user/login
-      toast.success("You are Successfully Logged In",{
+      toast.success("Success",{
         description: response.data.message
       })
       try {
@@ -65,7 +65,7 @@ export function LoginForm({
       console.error("Error In Login",error)
       const axiosError = error as AxiosError;
       const errorMessage = (axiosError.response?.data as {message : string})?.message ?? "Logging Failed";
-      toast.error("Logging In Failed",{
+      toast.error("Failed Log IN",{
         description: errorMessage,
       });
       setIsSubmitting(false);

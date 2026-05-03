@@ -84,12 +84,12 @@ export default function AccountPage() {
     if (linked === null) return;
 
     if (linked === "true") {
-      toast.success("Google Account Linked", {
-        description: message || "Google account linked successfully.",
+      toast.success("Success", {
+        description: message || "Initiated Process Successful.",
       });
     } else {
-      toast.error("Linking Failed", {
-        description: message || "Failed to link Google account.",
+      toast.error("Failed", {
+        description: message || "Initiated Process Failed.",
       });
     }
 

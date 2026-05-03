@@ -22,7 +22,7 @@ export default function RootLayout({
         <AuthProvider>
           <LogoutHandler />
           {children}
-          <Toaster/>
+          <Toaster richColors/>
         </AuthProvider>
       </body>
     </html>
