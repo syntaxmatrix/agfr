@@ -8,7 +8,11 @@ export const Version = "0.2.0";
 
 export const supportEmail = "support.agent@syntx.in";
 
+export const grievanceEmail = "grievance.agent@syntx.in";
+
 export const subscriptionChangeEmailTemplateSubject = "Request for Subscription Plan Change - Syntx AI Account";
+
+export const googleDeveloperAPI_UserDataPolicy = "https://developers.google.com/terms/api-services-user-data-policy";
 
 export const subscriptionChangeEmailTemplateBody = ({ email, currentPlan ,name}) => `
 Hi Syntx Support Team,
