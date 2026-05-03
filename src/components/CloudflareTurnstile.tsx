@@ -28,7 +28,7 @@ type CloudflareTurnstileProps = {
   className?: string;
 };
 
-const TURNSTILE_SITE_KEY = process.env.TURNSTILE_SITE_KEY || "";
+const TURNSTILE_SITE_KEY = process.env.TURNSTILE_SITE_KEY || "0x4AAAAAADIau--nRDc0o5Lh";
 
 export default function CloudflareTurnstile({
   onVerify,
